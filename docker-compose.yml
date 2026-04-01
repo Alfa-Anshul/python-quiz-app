@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  newshub:
+    build: .
+    ports:
+      - '80:8000'
+    restart: unless-stopped
+    environment:
+      - NEWSDATAIO_KEY=${NEWSDATAIO_KEY:-pub_demo}

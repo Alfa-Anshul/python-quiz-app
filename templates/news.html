@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NewsHub – Headlines</title>
+<style>
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
+  body { background:#0a0f1e; font-family:'Segoe UI',system-ui,sans-serif; color:#e2e8f0; min-height:100vh }
+  /* NAV */
+  nav {
+    background: linear-gradient(90deg,#0f2027,#1e3a5f);
+    padding: 0 32px;
+    display:flex; align-items:center; justify-content:space-between;
+    height:68px; position:sticky; top:0; z-index:100;
+    box-shadow:0 2px 20px rgba(0,0,0,0.5);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .brand { font-size:1.5rem; font-weight:800; color:#fff }
+  .brand span { color:#38bdf8 }
+  .nav-right { display:flex; align-items:center; gap:16px }
+  .user-chip {
+    background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.25);
+    padding:6px 14px; border-radius:20px; font-size:.82rem; color:#7dd3fc;
+  }
+  .logout {
+    padding:7px 16px; border-radius:8px;
+    background:rgba(239,68,68,0.12); color:#fca5a5;
+    text-decoration:none; font-size:.82rem; font-weight:600;
+    border:1px solid rgba(239,68,68,0.25); transition:.2s;
+  }
+  .logout:hover { background:rgba(239,68,68,0.28) }
+  /* HERO */
+  .hero {
+    background:linear-gradient(135deg,#0f2027,#1a3a5c);
+    padding:32px; text-align:center;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .hero h2 { font-size:1.6rem; font-weight:700; color:#fff; margin-bottom:4px }
+  .hero p { color:#64748b; font-size:.88rem }
+  /* CONTAINER */
+  .container { max-width:1280px; margin:0 auto; padding:28px 20px }
+  /* SEARCH */
+  .search-bar { display:flex; gap:10px; margin-bottom:24px }
+  .search-bar input {
+    flex:1; padding:12px 18px; border-radius:12px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.05); color:#fff; font-size:.95rem; outline:none; transition:.2s;
+  }
+  .search-bar input:focus { border-color:#38bdf8; background:rgba(56,189,248,0.06) }
+  .search-bar button {
+    padding:12px 24px; border:none; border-radius:12px;
+    background:linear-gradient(90deg,#0ea5e9,#6366f1);
+    color:#fff; font-weight:700; cursor:pointer; transition:.2s;
+  }
+  .search-bar button:hover { opacity:.9 }
+  /* CATEGORIES */
+  .cats { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:32px }
+  .cat {
+    padding:8px 18px; border-radius:20px;
+    border:1px solid rgba(255,255,255,0.12);
+    color:#64748b; text-decoration:none;
+    font-size:.8rem; font-weight:600; transition:.2s;
+  }
+  .cat:hover { border-color:#38bdf8; color:#38bdf8 }
+  .cat.active {
+    background:linear-gradient(90deg,#0ea5e9,#6366f1);
+    color:#fff; border-color:transparent;
+    box-shadow:0 4px 12px rgba(14,165,233,0.3);
+  }
+  /* GRID */
+  .section-label { font-size:.78rem; font-weight:700; color:#475569; letter-spacing:.5px; text-transform:uppercase; margin-bottom:20px }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:20px }
+  .card {
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:18px; overflow:hidden;
+    display:flex; flex-direction:column;
+    transition:all .25s;
+  }
+  .card:hover {
+    transform:translateY(-5px);
+    box-shadow:0 16px 48px rgba(0,0,0,0.4);
+    border-color:rgba(56,189,248,0.25);
+  }
+  .card img { width:100%; height:185px; object-fit:cover }
+  .card-body { padding:20px; flex:1; display:flex; flex-direction:column; gap:10px }
+  .card-meta { display:flex; align-items:center; justify-content:space-between }
+  .card-src { font-size:.7rem; color:#38bdf8; font-weight:700; text-transform:uppercase; letter-spacing:.8px }
+  .card-date { font-size:.7rem; color:#334155 }
+  .card-title { font-size:.97rem; font-weight:700; color:#f1f5f9; line-height:1.45 }
+  .card-desc { font-size:.82rem; color:#64748b; flex:1; line-height:1.55 }
+  .card-link {
+    margin-top:auto; display:inline-flex; align-items:center; gap:6px;
+    padding:8px 16px; border-radius:8px;
+    background:rgba(14,165,233,0.1); color:#38bdf8;
+    text-decoration:none; font-size:.8rem; font-weight:600;
+    border:1px solid rgba(14,165,233,0.2); transition:.2s; width:fit-content;
+  }
+  .card-link:hover { background:#0ea5e9; color:#fff; border-color:#0ea5e9 }
+  /* EMPTY */
+  .empty { text-align:center; padding:100px 20px; color:#334155 }
+  .empty .big { font-size:3rem; margin-bottom:12px }
+  /* FOOTER */
+  footer {
+    text-align:center; padding:32px; color:#1e293b; font-size:.78rem;
+    border-top:1px solid rgba(255,255,255,0.04); margin-top:48px;
+  }
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">📰 News<span>Hub</span></div>
+  <div class="nav-right">
+    <span class="user-chip">👤 {{ user }}</span>
+    <a href="/logout" class="logout">Logout</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h2>Today's Top Headlines</h2>
+  <p>Stay informed with the latest news from around the world</p>
+</div>
+
+<div class="container">
+  <form method="get" action="/news" class="search-bar">
+    <input type="hidden" name="category" value="{{ category }}"/>
+    <input type="text" name="q" value="{{ q }}" placeholder="🔍  Search for news topics..."/>
+    <button type="submit">Search</button>
+  </form>
+
+  <div class="cats">
+    {% for cat in ['general','world','business','technology','entertainment','sports','science','health'] %}
+    <a href="/news?category={{ cat }}" class="cat {% if category == cat %}active{% endif %}">
+      {{ cat | capitalize }}
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if articles %}
+  <div class="section-label">{{ articles | length }} article{% if articles|length != 1 %}s{% endif %} found</div>
+  <div class="grid">
+    {% for a in articles %}
+    <div class="card">
+      {% if a.image_url %}
+      <img src="{{ a.image_url }}" alt="" loading="lazy" onerror="this.style.display='none'"/>
+      {% endif %}
+      <div class="card-body">
+        <div class="card-meta">
+          <span class="card-src">{{ a.source_id or 'News' }}</span>
+          <span class="card-date">{{ (a.pubDate or '')[:10] }}</span>
+        </div>
+        <div class="card-title">{{ a.title }}</div>
+        <div class="card-desc">
+          {{ (a.description or '') | truncate(160) }}
+        </div>
+        <a href="{{ a.link }}" target="_blank" rel="noopener noreferrer" class="card-link">
+          Read more →
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="big">📡</div>
+    <p>No articles found. Check your API key or try a different category.</p>
+  </div>
+  {% endif %}
+</div>
+
+<footer>NewsHub © 2024 &nbsp;·&nbsp; kapil@anervea.live &nbsp;·&nbsp; Powered by Anervea</footer>
+</body>
+</html>
