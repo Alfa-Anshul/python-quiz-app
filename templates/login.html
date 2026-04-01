@@ -5,64 +5,37 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>NewsHub – Sign In</title>
 <style>
-  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
-  body {
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-  }
-  .card {
-    background: rgba(255,255,255,0.07);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 24px;
-    padding: 52px 44px;
-    width: 400px;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
-  }
-  .logo { text-align:center; margin-bottom:36px }
-  .logo .icon { font-size:3rem; margin-bottom:8px }
-  .logo h1 { color:#fff; font-size:2rem; font-weight:800; letter-spacing:-1px }
-  .logo h1 span { color:#38bdf8 }
-  .logo p { color:#64748b; font-size:.85rem; margin-top:6px }
-  .field { margin-bottom:20px }
-  label {
-    display:block; color:#94a3b8; font-size:.78rem;
-    font-weight:700; letter-spacing:.8px;
-    text-transform:uppercase; margin-bottom:7px;
-  }
-  input {
-    width:100%; padding:13px 16px; border-radius:12px;
-    border:1px solid rgba(255,255,255,0.15);
-    background:rgba(255,255,255,0.07);
-    color:#fff; font-size:.95rem; outline:none; transition:all .2s;
-  }
-  input::placeholder { color:#475569 }
-  input:focus {
-    border-color:#38bdf8;
-    background:rgba(56,189,248,0.08);
-    box-shadow: 0 0 0 3px rgba(56,189,248,0.12);
-  }
-  .btn {
-    width:100%; padding:14px; border:none; border-radius:12px;
-    background: linear-gradient(90deg, #0ea5e9, #6366f1);
-    color:#fff; font-size:1rem; font-weight:700;
-    cursor:pointer; letter-spacing:.3px; transition:all .2s; margin-top:8px;
-  }
-  .btn:hover { opacity:.92; transform:translateY(-2px); box-shadow:0 8px 24px rgba(14,165,233,0.4) }
-  .error {
-    background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.35);
-    color:#fca5a5; padding:11px 16px; border-radius:10px;
-    font-size:.84rem; margin-bottom:20px; text-align:center;
-  }
-  .footer {
-    text-align:center; color:#334155; font-size:.75rem;
-    margin-top:24px; border-top:1px solid rgba(255,255,255,0.08); padding-top:20px;
-  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#0f2027 0%,#203a43 50%,#2c5364 100%);
+    font-family:'Segoe UI',system-ui,sans-serif}
+  .card{background:rgba(255,255,255,0.07);backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.15);border-radius:24px;
+    padding:52px 44px;width:400px;box-shadow:0 24px 64px rgba(0,0,0,0.5)}
+  .logo{text-align:center;margin-bottom:36px}
+  .logo .icon{font-size:3rem;margin-bottom:8px}
+  .logo h1{color:#fff;font-size:2rem;font-weight:800;letter-spacing:-1px}
+  .logo h1 span{color:#38bdf8}
+  .logo p{color:#64748b;font-size:.85rem;margin-top:6px}
+  .field{margin-bottom:20px}
+  label{display:block;color:#94a3b8;font-size:.78rem;font-weight:700;
+    letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px}
+  input{width:100%;padding:13px 16px;border-radius:12px;
+    border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);
+    color:#fff;font-size:.95rem;outline:none;transition:all .2s}
+  input::placeholder{color:#475569}
+  input:focus{border-color:#38bdf8;background:rgba(56,189,248,0.08);
+    box-shadow:0 0 0 3px rgba(56,189,248,0.12)}
+  .btn{width:100%;padding:14px;border:none;border-radius:12px;
+    background:linear-gradient(90deg,#0ea5e9,#6366f1);
+    color:#fff;font-size:1rem;font-weight:700;cursor:pointer;
+    letter-spacing:.3px;transition:all .2s;margin-top:8px}
+  .btn:hover{opacity:.92;transform:translateY(-2px);box-shadow:0 8px 24px rgba(14,165,233,0.4)}
+  .error{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);
+    color:#fca5a5;padding:11px 16px;border-radius:10px;
+    font-size:.84rem;margin-bottom:20px;text-align:center}
+  .footer{text-align:center;color:#334155;font-size:.75rem;
+    margin-top:24px;border-top:1px solid rgba(255,255,255,0.08);padding-top:20px}
 </style>
 </head>
 <body>
@@ -72,9 +45,7 @@
     <h1>News<span>Hub</span></h1>
     <p>Your premium daily news experience</p>
   </div>
-  {% if error %}
-  <div class="error">⚠️ {{ error }}</div>
-  {% endif %}
+  {% if error %}<div class="error">⚠️ {{ error }}</div>{% endif %}
   <form method="post" action="/login">
     <div class="field">
       <label for="username">Username</label>
