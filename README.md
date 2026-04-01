@@ -1,16 +1,19 @@
 # 📰 NewsHub — kapil@anervea.live
 
-## Login
-| Field | Value |
-|---|---|
-| Username | `kapil` |
+## Login Credentials
+| Field    | Value      |
+|----------|------------|
+| Username | `kapil`    |
 | Password | `Pass@123` |
 
 ## Run with Docker
 ```bash
-cp .env.example .env
+cp .env.example .env   # add your NEWSDATAIO_KEY
 docker-compose up -d
 ```
 
 ## Domain
 kapil@anervea.live
+
+## API
+[NewsData.io](https://newsdata.io) — free tier (200 req/day)
