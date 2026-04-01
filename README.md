@@ -8,7 +8,7 @@
 
 ## Run with Docker
 ```bash
-cp .env.example .env   # add your NEWSDATAIO_KEY
+cp .env.example .env
 docker-compose up -d
 ```
 
