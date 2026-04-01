@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PyQuiz — Python MCQ Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111418;
+    --surface2: #181c22;
+    --border: #1e2530;
+    --accent: #00e5a0;
+    --accent2: #00b8ff;
+    --accent3: #ff6b35;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --wrong: #ff4d6d;
+    --correct: #00e5a0;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Syne', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(0,229,160,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 90%, rgba(0,184,255,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 780px;
+    padding: 24px 16px;
+  }
+  /* ---- LANDING ---- */
+  #landing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 32px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.25);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .logo-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(42px, 8vw, 80px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 420px;
+    line-height: 1.8;
+  }
+  .hero-sub span { color: var(--accent); }
+  .stats-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .stat-num { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .start-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    padding: 16px 48px;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 0 0 rgba(0,229,160,0.4);
+  }
+  .start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,229,160,0.3);
+  }
+  .start-btn:active { transform: translateY(0); }
+  /* ---- QUIZ ---- */
+  #quiz { display: none; animation: fadeUp 0.5s ease both; }
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .q-counter {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .q-counter strong { color: var(--accent); font-size: 15px; }
+  .timer-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: var(--accent2);
+  }
+  .timer-badge .t-icon { font-size: 14px; }
+  .progress-track {
+    width: 100%;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 999px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .q-tag {
+    display: inline-block;
+    background: rgba(0,229,160,0.1);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .q-text {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    font-weight: 400;
+  }
+  code {
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.15);
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+  }
+  .options-grid {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .option-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: left;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(0,229,160,0.06);
+    transform: translateX(3px);
+  }
+  .option-btn:disabled { cursor: default; transform: none; }
+  .opt-letter {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+    color: var(--muted);
+  }
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: rgba(0,229,160,0.1);
+  }
+  .option-btn.correct .opt-letter { background: var(--correct); color: #000; }
+  .option-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,77,109,0.08);
+  }
+  .option-btn.wrong .opt-letter { background: var(--wrong); color: #fff; }
+  .feedback-box {
+    display: none;
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--accent);
+  }
+  .feedback-box.wrong-fb { border-color: var(--wrong); }
+  .feedback-box .fb-title { font-weight: 700; margin-bottom: 4px; color: var(--accent); }
+  .feedback-box.wrong-fb .fb-title { color: var(--wrong); }
+  .next-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 12px;
+    padding: 14px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    letter-spacing: 0.04em;
+    display: none;
+  }
+  .next-btn:hover { background: var(--accent); color: #000; }
+  /* ---- RESULT ---- */
+  #result { display: none; animation: fadeUp 0.5s ease both; }
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px 32px;
+    text-align: center;
+  }
+  .score-ring {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    border: 3px solid var(--border);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 0 auto 28px;
+    position: relative;
+    background: var(--surface2);
+  }
+  .score-ring::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) var(--pct), transparent 0);
+    z-index: -1;
+    transition: --pct 0.6s ease;
+  }
+  .score-ring::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background: var(--surface2);
+    z-index: -1;
+  }
+  .score-num { font-family: var(--font-display); font-size: 42px; font-weight: 800; color: var(--accent); }
+  .score-lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .grade-title { font-family: var(--font-display); font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .grade-msg { color: var(--muted); font-size: 13px; margin-bottom: 28px; line-height: 1.7; }
+  .breakdown {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .bk-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 20px;
+  }
+  .bk-num { font-size: 20px; font-weight: 700; }
+  .bk-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .bk-item.correct-bk .bk-num { color: var(--correct); }
+  .bk-item.wrong-bk .bk-num { color: var(--wrong); }
+  .bk-item.time-bk .bk-num { color: var(--accent2); }
+  .retry-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 40px;
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .retry-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,229,160,0.3); }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @media(max-width:520px) {
+    .question-card { padding: 20px 16px; }
+    .hero-title { letter-spacing: -1px; }
+  }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="container">
+
+  <!-- LANDING -->
+  <section id="landing">
+    <div class="logo-badge"><span class="dot"></span> Python MCQ Challenge</div>
+    <h1 class="hero-title">PyQuiz</h1>
+    <p class="hero-sub">Test your <span>Python</span> knowledge across 10 carefully crafted questions. From basics to built-ins — can you score <span>10/10</span>?</p>
+    <div class="stats-row">
+      <div class="stat-pill"><span class="stat-num">10</span><span class="stat-lbl">Questions</span></div>
+      <div class="stat-pill"><span class="stat-num">20s</span><span class="stat-lbl">Per Question</span></div>
+      <div class="stat-pill"><span class="stat-num">4</span><span class="stat-lbl">Options Each</span></div>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">Start Quiz →</button>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz">
+    <div class="quiz-header">
+      <div class="q-counter">Question <strong id="q-num">1</strong> of 10</div>
+      <div class="timer-badge"><span class="t-icon">⏱</span> <span id="timer">20</span>s</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+    <div class="question-card">
+      <div class="q-tag" id="q-category">Python Basics</div>
+      <p class="q-text" id="q-text"></p>
+    </div>
+    <div class="options-grid" id="options"></div>
+    <div class="feedback-box" id="feedback">
+      <div class="fb-title" id="fb-title">Correct!</div>
+      <div id="fb-body"></div>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result">
+    <div class="result-card">
+      <div class="score-ring" id="score-ring">
+        <span class="score-num" id="score-num">0</span>
+        <span class="score-lbl">/ 10</span>
+      </div>
+      <h2 class="grade-title" id="grade-title">Loading…</h2>
+      <p class="grade-msg" id="grade-msg"></p>
+      <div class="breakdown">
+        <div class="bk-item correct-bk"><span class="bk-num" id="bk-correct">0</span><span class="bk-lbl">Correct</span></div>
+        <div class="bk-item wrong-bk"><span class="bk-num" id="bk-wrong">0</span><span class="bk-lbl">Wrong</span></div>
+        <div class="bk-item time-bk"><span class="bk-num" id="bk-time">0s</span><span class="bk-lbl">Total Time</span></div>
+      </div>
+      <button class="retry-btn" onclick="retryQuiz()">Try Again</button>
+    </div>
+  </section>
+
+</div>
+<script>
+const QUESTIONS = [
+  {
+    category: 'Data Types',
+    text: 'What is the output of <code>type([])</code> in Python?',
+    options: ["&lt;class 'array'&gt;", "&lt;class 'list'&gt;", "&lt;class 'tuple'&gt;", "&lt;class 'dict'&gt;"],
+    answer: 1,
+    explanation: 'Square brackets <code>[]</code> create a <code>list</code> object in Python. Its type is <code>&lt;class list&gt;</code>.'
+  },
+  {
+    category: 'Strings',
+    text: 'Which method removes whitespace from both ends of a string?',
+    options: ['strip()', 'trim()', 'clean()', 'chomp()'],
+    answer: 0,
+    explanation: '<code>str.strip()</code> removes leading and trailing whitespace. <code>lstrip()</code> and <code>rstrip()</code> do one side each.'
+  },
+  {
+    category: 'Control Flow',
+    text: 'What does <code>range(2, 10, 3)</code> produce?',
+    options: ['[2, 5, 8, 11]', '[2, 5, 8]', '[3, 6, 9]', '[2, 4, 6, 8]'],
+    answer: 1,
+    explanation: '<code>range(start, stop, step)</code> yields 2, 5, 8. The next value 11 exceeds stop=10, so it is excluded.'
+  },
+  {
+    category: 'Functions',
+    text: 'What keyword is used to define an anonymous function in Python?',
+    options: ['def', 'func', 'lambda', 'anon'],
+    answer: 2,
+    explanation: '<code>lambda</code> creates anonymous functions: <code>f = lambda x: x*2</code>. They are limited to a single expression.'
+  },
+  {
+    category: 'Data Structures',
+    text: 'Which of these is an immutable sequence type in Python?',
+    options: ['list', 'dict', 'set', 'tuple'],
+    answer: 3,
+    explanation: 'A <code>tuple</code> is immutable — once created, its elements cannot be changed. Lists are mutable.'
+  },
+  {
+    category: 'OOP',
+    text: 'What does the <code>__init__</code> method do in a Python class?',
+    options: ['Deletes an object', 'Initialises object attributes', 'Defines class variables only', 'Prints the class name'],
+    answer: 1,
+    explanation: '<code>__init__</code> is the constructor called when a new instance is created. It initialises instance attributes.'
+  },
+  {
+    category: 'Built-ins',
+    text: 'What is the output of <code>len("hello world")</code>?',
+    options: ['10', '11', '9', '12'],
+    answer: 1,
+    explanation: '"hello world" has 5 + 1 (space) + 5 = 11 characters. <code>len()</code> counts every character including spaces.'
+  },
+  {
+    category: 'Error Handling',
+    text: 'Which block always executes in a <code>try/except</code> structure, regardless of errors?',
+    options: ['else', 'finally', 'catch', 'always'],
+    answer: 1,
+    explanation: 'The <code>finally</code> block always runs after <code>try</code>, whether an exception occurred or not — ideal for cleanup.'
+  },
+  {
+    category: 'List Comprehension',
+    text: 'What does <code>[x**2 for x in range(4)]</code> evaluate to?',
+    options: ['[1, 4, 9, 16]', '[0, 2, 4, 6]', '[0, 1, 4, 9]', '[1, 2, 3, 4]'],
+    answer: 2,
+    explanation: '<code>range(4)</code> gives 0,1,2,3. Squaring each: 0²=0, 1²=1, 2²=4, 3²=9 → <code>[0, 1, 4, 9]</code>.'
+  },
+  {
+    category: 'Modules',
+    text: 'Which statement correctly imports only the <code>sqrt</code> function from the <code>math</code> module?',
+    options: ['import math.sqrt', 'from math import sqrt', 'import sqrt from math', 'include math.sqrt'],
+    answer: 1,
+    explanation: '<code>from math import sqrt</code> imports only <code>sqrt</code> into the current namespace so you can call <code>sqrt(16)</code> directly.'
+  }
+];
+
+let current = 0, score = 0, answered = false;
+let timerInt = null, timeLeft = 20;
+let totalTime = 0, startTime = 0;
+
+function shuffle(arr) {
+  const a = [...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
+}
+
+let shuffled = [];
+
+function startQuiz() {
+  shuffled = shuffle(QUESTIONS);
+  current = 0; score = 0; answered = false;
+  totalTime = 0; startTime = Date.now();
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false;
+  timeLeft = 20;
+  const q = shuffled[current];
+  document.getElementById('q-num').textContent = current + 1;
+  document.getElementById('q-category').textContent = q.category;
+  document.getElementById('q-text').innerHTML = q.text;
+  document.getElementById('progress').style.width = (current / 10 * 100) + '%';
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('timer').textContent = timeLeft;
+  const og = document.getElementById('options');
+  og.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${labels[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    og.appendChild(btn);
+  });
+  clearInterval(timerInt);
+  timerInt = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').textContent = timeLeft;
+    if(timeLeft <= 0) { clearInterval(timerInt); if(!answered) timeOut(); }
+  }, 1000);
+}
+
+function selectAnswer(idx) {
+  if(answered) return;
+  answered = true;
+  clearInterval(timerInt);
+  const q = shuffled[current];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+  if(idx === q.answer) {
+    score++;
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback-box';
+    document.getElementById('fb-title').textContent = '✓ Correct!';
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.answer].classList.add('correct');
+    fb.className = 'feedback-box wrong-fb';
+    document.getElementById('fb-title').textContent = '✗ Incorrect';
+  }
+  document.getElementById('fb-body').innerHTML = q.explanation;
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+  document.getElementById('next-btn').textContent = current < 9 ? 'Next Question →' : 'See Results →';
+}
+
+function timeOut() {
+  answered = true;
+  const q = shuffled[current];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[q.answer].classList.add('correct');
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback-box wrong-fb';
+  document.getElementById('fb-title').textContent = '⏱ Time\'s up!';
+  document.getElementById('fb-body').innerHTML = q.explanation;
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+  document.getElementById('next-btn').textContent = current < 9 ? 'Next Question →' : 'See Results →';
+}
+
+function nextQuestion() {
+  current++;
+  if(current >= 10) { showResult(); return; }
+  loadQuestion();
+}
+
+function showResult() {
+  totalTime = Math.round((Date.now() - startTime) / 1000);
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('bk-correct').textContent = score;
+  document.getElementById('bk-wrong').textContent = 10 - score;
+  document.getElementById('bk-time').textContent = totalTime + 's';
+  const pct = score * 10;
+  document.getElementById('score-ring').style.setProperty('--pct', pct + '%');
+  const grades = [
+    { min:9, title:'🏆 Python Master', msg:'Exceptional! You clearly know Python inside and out. Impressive score!' },
+    { min:7, title:'🔥 Python Pro', msg:'Great work! You have solid Python knowledge with just a few gaps to close.' },
+    { min:5, title:'⚡ Getting There', msg:'Decent foundation! Review the questions you missed and try again.' },
+    { min:0, title:'📚 Keep Learning', msg:'Python takes practice. Study the explanations and come back stronger!' }
+  ];
+  const g = grades.find(g => score >= g.min);
+  document.getElementById('grade-title').textContent = g.title;
+  document.getElementById('grade-msg').textContent = g.msg;
+}
+
+function retryQuiz() {
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('landing').style.display = 'flex';
+}
+</script>
+</body>
+</html>
